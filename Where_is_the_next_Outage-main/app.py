@@ -77,7 +77,7 @@ def load_and_clean_data():
     ]
     df = df.drop(labels=drop_cols2, axis=1)
     mean_dur = df.groupby('CLIMATE.REGION')['OUTAGE.DURATION(mins)'].mean()
-    df['OUTAGE.DURATION(mins)'].fillna(df['CLIMATE.REGION'].map(mean_dur), inplace=True)
+    df['OUTAGE.DURATION(mins)'] = df['OUTAGE.DURATION(mins)'].fillna(df['CLIMATE.REGION'].map(mean_dur))
     df.at[1533, 'OUTAGE.DURATION(mins)'] = 1860
     df['CLIMATE.REGION'] = (df['CLIMATE.REGION'] == 'West').astype(int)
     return df
@@ -117,7 +117,7 @@ with tab1:
 with tab2:
     st.header("Data Exploration")
     st.markdown(f"**Dataset shape:** {df.shape[0]} rows, {df.shape[1]} columns")
-    st.dataframe(df.head(10), use_container_width=True)
+    st.dataframe(df.head(10), width='stretch')
 
     col1, col2 = st.columns(2)
     with col1:
@@ -163,10 +163,12 @@ with tab3:
     """)
 
     baseline_features = ['NERC.REGION', 'CAUSE.CATEGORY', 'OUTAGE.DURATION(mins)']
-    X_train_base = train_set[baseline_features]
-    X_test_base = test_set[baseline_features]
-    y_train_base = train_set['CLIMATE.REGION']
-    y_test_base = test_set['CLIMATE.REGION']
+    base_train = train_set[baseline_features + ['CLIMATE.REGION']].dropna()
+    base_test = test_set[baseline_features + ['CLIMATE.REGION']].dropna()
+    X_train_base = base_train[baseline_features]
+    y_train_base = base_train['CLIMATE.REGION']
+    X_test_base = base_test[baseline_features]
+    y_test_base = base_test['CLIMATE.REGION']
 
     categorical_cols_base = ['NERC.REGION', 'CAUSE.CATEGORY']
     preprocessor_base = ColumnTransformer([
@@ -227,10 +229,12 @@ with tab4:
         'PC.REALGSP.STATE(USD)', 'OUTAGE.DURATION(mins)', 'PI.UTIL.OFUSA(%)'
     ]
     available_feats = [f for f in final_features if f in train_set.columns]
-    X_train_final = train_set[available_feats]
-    y_train_final = train_set['CLIMATE.REGION']
-    X_test_final = test_set[available_feats]
-    y_test_final = test_set['CLIMATE.REGION']
+    final_train = train_set[available_feats + ['CLIMATE.REGION']].dropna()
+    final_test = test_set[available_feats + ['CLIMATE.REGION']].dropna()
+    X_train_final = final_train[available_feats]
+    y_train_final = final_train['CLIMATE.REGION']
+    X_test_final = final_test[available_feats]
+    y_test_final = final_test['CLIMATE.REGION']
 
     categorical_cols_final = ['CLIMATE.CATEGORY', 'CAUSE.CATEGORY.DETAIL', 'CAUSE.CATEGORY']
     categorical_cols_final = [c for c in categorical_cols_final if c in available_feats]
