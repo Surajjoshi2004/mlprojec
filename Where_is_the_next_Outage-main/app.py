@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
+from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
@@ -18,8 +20,9 @@ st.markdown("Predict whether a power outage occurs in the **West Climate region*
 
 @st.cache_data
 def load_and_clean_data():
+    BASE_DIR = Path(__file__).parent
     rows_to_skip = list(range(5))
-    df = pd.read_csv('data/outage.csv', skiprows=rows_to_skip, index_col='OBS')
+    df = pd.read_csv(BASE_DIR / 'data' / 'outage.csv', skiprows=rows_to_skip, index_col='OBS')
     column = np.array(df.columns).astype('str')
     unites = np.array(df.iloc[0].fillna('')).astype('str')
     unites = ["(" + i + ")" for i in unites]
