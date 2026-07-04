@@ -29,7 +29,7 @@ def load_and_clean_data():
     for i in range(len(unites)):
         if unites[i] == '()':
             unites[i] = ''
-    combined_column = np.core.defchararray.add(column, unites)
+    combined_column = np.char.add(column, unites)
     df.columns = combined_column
     df = df.reset_index().drop(0).drop('variables(Units)', axis=1).reset_index(drop=True)
     df['YEAR'] = df['YEAR'].astype('int')
@@ -40,13 +40,14 @@ def load_and_clean_data():
     end_date = df['OUTAGE.RESTORATION.DATE(Day of the week, Month Day, Year)']
     df["OUTAGE.RESTORATION"] = pd.to_datetime(end_date + " " + end_time)
     df['ANOMALY.LEVEL'] = df['ANOMALY.LEVEL(numeric)'].astype(float)
-    df = df.drop(columns=[
+    drop_cols = [
         'ANOMALY.LEVEL(numeric)',
         'OUTAGE.START.DATE(Day of the week, Month Day, Year)',
         'OUTAGE.START.TIME(Hour:Minute:Second (AM / PM))',
         'OUTAGE.RESTORATION.DATE(Day of the week, Month Day, Year)',
         'OUTAGE.RESTORATION.TIME(Hour:Minute:Second (AM / PM))'
-    ], axis=1)
+    ]
+    df = df.drop(labels=drop_cols, axis=1)
     cols_float = [
         'OUTAGE.DURATION(mins)', 'DEMAND.LOSS.MW(Megawatt)',
         'RES.PRICE(cents / kilowatt-hour)', 'COM.PRICE(cents / kilowatt-hour)',
@@ -67,13 +68,14 @@ def load_and_clean_data():
         if c in df.columns:
             df[c] = df[c].astype(float)
     df = df.drop('OBS', axis=1)
-    df = df.drop(columns=[
+    drop_cols2 = [
         'POSTAL.CODE', 'OUTAGE.START', 'OUTAGE.RESTORATION', 'U.S._STATE',
         'HURRICANE.NAMES', 'POPDEN_URBAN(persons per square mile)',
         'POPPCT_URBAN(%)', 'POPPCT_UC(%)', 'POPDEN_UC(persons per square mile)',
         'POPDEN_RURAL(persons per square mile)', 'AREAPCT_URBAN(%)',
         'PCT_LAND(%)', 'PCT_WATER_TOT(%)', 'PCT_WATER_INLAND(%)', 'AREAPCT_UC(%)'
-    ])
+    ]
+    df = df.drop(labels=drop_cols2, axis=1)
     mean_dur = df.groupby('CLIMATE.REGION')['OUTAGE.DURATION(mins)'].mean()
     df['OUTAGE.DURATION(mins)'].fillna(df['CLIMATE.REGION'].map(mean_dur), inplace=True)
     df.at[1533, 'OUTAGE.DURATION(mins)'] = 1860
