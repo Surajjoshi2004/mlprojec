@@ -1,4 +1,3 @@
-By Eric Sun (z9sun@ucsd.edu) & Sunan Xu (sux002@ucsd.edu)
 
 ---
 
